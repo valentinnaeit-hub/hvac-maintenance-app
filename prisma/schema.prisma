@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SuperAdmin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Client {
+  id              String   @id @default(uuid())
+  numePrenume     String
+  telefon         String
+  zona            String
+  adresa          String
+  serieEchipament String
+  codISCIR        String
+  modelEchipament String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tasks           Task[]
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  clientId       String
+  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  denumire       String
+  data           DateTime
+  efectuat       Boolean      @default(false)
+  inGarantie     Boolean      @default(false)
+  duritateApa    String       @default("")
+  defectiune     String       @default("")
+  remedieri      String       @default("")
+  pieseInlocuite String       @default("")
+  alteComentarii String       @default("")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  attachments    Attachment[]
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  taskId       String
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  originalName String
+  mimeType     String
+  size         Int
+  storagePath  String
+  createdAt    DateTime @default(now())
+}
