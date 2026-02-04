@@ -36,10 +36,10 @@ export function SuperadminList({
       {superadmins.map((admin) => (
         <div
           key={admin.id}
-          className="flex items-center justify-between p-4 rounded-lg border bg-card"
+          className="flex items-center justify-between p-3 sm:p-4 rounded-lg border bg-card gap-2"
         >
-          <div>
-            <p className="font-medium">{admin.email}</p>
+          <div className="min-w-0">
+            <p className="font-medium break-all">{admin.email}</p>
             <p className="text-sm text-muted-foreground">
               Creat: {formatDate(admin.createdAt)}
             </p>

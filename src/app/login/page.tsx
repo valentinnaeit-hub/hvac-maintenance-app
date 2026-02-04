@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -53,9 +54,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 space-y-6">
+      <div className="w-full max-w-md px-4 py-8 sm:p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">HVAC Maintenance</h1>
+          <Image src="/Logo_EAS.png" alt="EAS Logo" width={160} height={53} priority className="mx-auto" />
           <p className="text-muted-foreground mt-2">
             Conecteaza-te pentru a continua
           </p>

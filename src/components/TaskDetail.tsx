@@ -154,25 +154,26 @@ export function TaskDetail({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center gap-2">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Button
               variant="ghost"
               size="icon"
+              className="flex-shrink-0"
               onClick={() => onOpenChange(false)}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <DialogTitle>{task.denumire}</DialogTitle>
+            <DialogTitle className="truncate">{task.denumire}</DialogTitle>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Checkbox
                 id="efectuat"
                 checked={efectuat}
                 onCheckedChange={(checked) => setEfectuat(checked as boolean)}
               />
-              <Label htmlFor="efectuat" className="text-sm">
+              <Label htmlFor="efectuat" className="text-xs sm:text-sm">
                 Efectuat
               </Label>
             </div>

@@ -35,10 +35,13 @@ export async function GET(
 
     const fileBuffer = await readFile(filePath)
 
+    const { searchParams } = new URL(request.url)
+    const inline = searchParams.get('inline') === 'true'
+
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': attachment.mimeType,
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(attachment.originalName)}"`,
+        'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename="${encodeURIComponent(attachment.originalName)}"`,
         'Content-Length': attachment.size.toString(),
       },
     })

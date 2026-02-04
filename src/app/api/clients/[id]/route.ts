@@ -39,6 +39,29 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const body = await request.json()
+
+    const client = await prisma.client.update({
+      where: { id },
+      data: body,
+    })
+
+    return NextResponse.json(client)
+  } catch (error) {
+    console.error('Error updating client:', error)
+    return NextResponse.json(
+      { error: 'Eroare la actualizarea clientului' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

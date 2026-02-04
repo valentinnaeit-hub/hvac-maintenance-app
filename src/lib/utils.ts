@@ -34,3 +34,12 @@ export function isTaskPastDue(taskDate: Date | string, efectuat: boolean): boole
   date.setHours(0, 0, 0, 0)
   return date < today
 }
+
+export function isTaskApproaching(taskDate: Date | string): boolean {
+  const date = new Date(taskDate)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  date.setHours(0, 0, 0, 0)
+  const diffDays = (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  return diffDays >= 0 && diffDays <= 7
+}

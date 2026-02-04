@@ -86,16 +86,16 @@ export default function SuperadminsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b px-6 py-4">
-        <div className="flex items-center gap-4">
+      <header className="border-b px-3 py-3 md:px-6 md:py-4">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-bold">Gestionare Administratori</h1>
+          <h1 className="text-lg md:text-xl font-bold">Gestionare Administratori</h1>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto p-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 py-4 md:p-6 space-y-6">
         <section>
           <h2 className="text-lg font-semibold mb-4">Adauga Administrator Nou</h2>
           <AddSuperadminForm onSuccess={fetchSuperadmins} />

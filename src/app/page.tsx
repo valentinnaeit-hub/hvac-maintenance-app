@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, LogOut, Users } from 'lucide-react'
+import Image from 'next/image'
+import { Plus, LogOut, Users, Eye, EyeOff } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/SearchInput'
 import { ClientList } from '@/components/ClientList'
@@ -11,16 +13,16 @@ import { AddClientModal } from '@/components/AddClientModal'
 import { AddTaskModal } from '@/components/AddTaskModal'
 import { TaskDetail } from '@/components/TaskDetail'
 
-interface NextTask {
+interface ListItem {
   id: string
-  denumire: string
-  data: string
-}
-
-interface ClientSummary {
-  id: string
-  numePrenume: string
-  nextTask: NextTask | null
+  type: 'task' | 'client'
+  denumire: string | null
+  data: string | null
+  client: {
+    id: string
+    numePrenume: string
+    ascuns?: boolean
+  }
 }
 
 interface Task {
@@ -51,12 +53,13 @@ interface ClientFull {
   serieEchipament: string
   codISCIR: string
   modelEchipament: string
+  ascuns?: boolean
   tasks: Task[]
 }
 
 export default function Dashboard() {
   const router = useRouter()
-  const [clients, setClients] = useState<ClientSummary[]>([])
+  const [listItems, setListItems] = useState<ListItem[]>([])
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
   const [selectedClient, setSelectedClient] = useState<ClientFull | null>(null)
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
@@ -64,23 +67,25 @@ export default function Dashboard() {
   const [isAddClientOpen, setIsAddClientOpen] = useState(false)
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showHidden, setShowHidden] = useState(false)
 
-  const fetchClients = useCallback(async () => {
+  const fetchListItems = useCallback(async () => {
     try {
       const params = new URLSearchParams()
       if (searchQuery) params.set('search', searchQuery)
+      if (showHidden) params.set('showHidden', 'true')
 
-      const response = await fetch(`/api/clients?${params}`)
+      const response = await fetch(`/api/tasks?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setClients(data)
+        setListItems(data)
       }
     } catch (error) {
-      console.error('Error fetching clients:', error)
+      console.error('Error fetching list:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [searchQuery])
+  }, [searchQuery, showHidden])
 
   const fetchClientDetails = useCallback(async (id: string) => {
     try {
@@ -95,8 +100,8 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    fetchClients()
-  }, [fetchClients])
+    fetchListItems()
+  }, [fetchListItems])
 
   useEffect(() => {
     if (selectedClientId) {
@@ -118,7 +123,7 @@ export default function Dashboard() {
 
   const handleClientAdded = () => {
     setIsAddClientOpen(false)
-    fetchClients()
+    fetchListItems()
   }
 
   const handleTaskAdded = (taskId: string) => {
@@ -126,7 +131,7 @@ export default function Dashboard() {
     if (selectedClientId) {
       fetchClientDetails(selectedClientId)
     }
-    fetchClients()
+    fetchListItems()
     setSelectedTaskId(taskId)
   }
 
@@ -134,7 +139,7 @@ export default function Dashboard() {
     if (selectedClientId) {
       fetchClientDetails(selectedClientId)
     }
-    fetchClients()
+    fetchListItems()
   }
 
   const handleTaskDeleted = () => {
@@ -142,7 +147,46 @@ export default function Dashboard() {
     if (selectedClientId) {
       fetchClientDetails(selectedClientId)
     }
-    fetchClients()
+    fetchListItems()
+  }
+
+  const handleClientDeleted = async () => {
+    if (!selectedClientId) return
+    try {
+      const response = await fetch(`/api/clients/${selectedClientId}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        setSelectedClientId(null)
+        setSelectedClient(null)
+        setSelectedTaskId(null)
+        fetchListItems()
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error)
+    }
+  }
+
+  const handleClientToggleHide = async () => {
+    if (!selectedClient) return
+    try {
+      const response = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ascuns: !selectedClient.ascuns }),
+      })
+      if (response.ok) {
+        fetchClientDetails(selectedClient.id)
+        fetchListItems()
+      }
+    } catch (error) {
+      console.error('Error toggling client visibility:', error)
+    }
+  }
+
+  const handleBackToList = () => {
+    setSelectedClientId(null)
+    setSelectedClient(null)
   }
 
   const selectedTask = selectedClient?.tasks.find(
@@ -152,29 +196,42 @@ export default function Dashboard() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="border-b px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">HVAC Maintenance</h1>
-        <div className="flex items-center gap-2">
+      <header className="border-b px-3 py-3 md:px-6 md:py-4 flex items-center justify-between">
+        <Image src="/Logo_EAS.png" alt="EAS Logo" width={120} height={40} priority />
+        <div className="flex items-center gap-1 md:gap-2">
           <Button variant="ghost" size="sm" onClick={() => router.push('/superadmins')}>
-            <Users className="h-4 w-4 mr-2" />
-            Administratori
+            <Users className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Administratori</span>
           </Button>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Deconectare
+            <LogOut className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Deconectare</span>
           </Button>
         </div>
       </header>
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left panel - Client list */}
-        <div className="w-[400px] border-r flex flex-col">
+        {/* Left panel - Task list */}
+        <div className={cn(
+          'w-full md:w-[400px] border-r flex flex-col',
+          selectedClientId ? 'hidden md:flex' : 'flex'
+        )}>
           <div className="p-4 space-y-4">
-            <Button className="w-full" onClick={() => setIsAddClientOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Adauga
-            </Button>
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={() => setIsAddClientOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Adauga
+              </Button>
+              <Button
+                variant={showHidden ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setShowHidden(!showHidden)}
+                title={showHidden ? 'Ascunde clientii ascunsi' : 'Arata clientii ascunsi'}
+              >
+                {showHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+            </div>
             <SearchInput
               value={searchQuery}
               onChange={setSearchQuery}
@@ -189,7 +246,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <ClientList
-                clients={clients}
+                items={listItems}
                 selectedClientId={selectedClientId}
                 onSelectClient={setSelectedClientId}
               />
@@ -198,11 +255,17 @@ export default function Dashboard() {
         </div>
 
         {/* Right panel - Client details */}
-        <div className="flex-1 overflow-hidden">
+        <div className={cn(
+          'flex-1 overflow-hidden',
+          selectedClientId ? 'flex flex-col' : 'hidden md:block'
+        )}>
           <ClientDetails
             client={selectedClient}
             onAddTask={() => setIsAddTaskOpen(true)}
             onSelectTask={setSelectedTaskId}
+            onBack={handleBackToList}
+            onDelete={handleClientDeleted}
+            onToggleHide={handleClientToggleHide}
           />
         </div>
       </div>

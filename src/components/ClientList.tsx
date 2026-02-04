@@ -2,43 +2,45 @@
 
 import { ClientCard } from './ClientCard'
 
-interface Client {
+interface ListItem {
   id: string
-  numePrenume: string
-  nextTask: {
+  type: 'task' | 'client'
+  denumire: string | null
+  data: string | Date | null
+  client: {
     id: string
-    denumire: string
-    data: string | Date
-  } | null
+    numePrenume: string
+    ascuns?: boolean
+  }
 }
 
 interface ClientListProps {
-  clients: Client[]
+  items: ListItem[]
   selectedClientId: string | null
   onSelectClient: (id: string) => void
 }
 
 export function ClientList({
-  clients,
+  items,
   selectedClientId,
   onSelectClient,
 }: ClientListProps) {
-  if (clients.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p>Niciun client gasit</p>
+        <p>Niciun rezultat gasit</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-2">
-      {clients.map((client) => (
+      {items.map((item) => (
         <ClientCard
-          key={client.id}
-          client={client}
-          isSelected={client.id === selectedClientId}
-          onClick={() => onSelectClient(client.id)}
+          key={`${item.type}-${item.id}`}
+          item={item}
+          isSelected={item.client.id === selectedClientId}
+          onClick={() => onSelectClient(item.client.id)}
         />
       ))}
     </div>

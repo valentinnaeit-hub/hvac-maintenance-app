@@ -23,6 +23,7 @@ model Client {
   serieEchipament String
   codISCIR        String
   modelEchipament String
+  ascuns          Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   tasks           Task[]
